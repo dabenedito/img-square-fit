@@ -1,7 +1,7 @@
 import { Context } from 'telegraf';
 import sharp from 'sharp';
 
-export const handleImageToSquare = async (ctx: Context) => {
+export const handleImageToSquare = async (ctx: Context, inputBuffer?: Buffer) => {
   try {
     const { photo: photos } = <any>ctx.message;
     if (!photos || photos.length === 0) {

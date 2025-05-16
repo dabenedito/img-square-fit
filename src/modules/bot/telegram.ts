@@ -1,7 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { Express } from 'express';
 import { TELEGRAM_BOT_TOKEN, WEBHOOK_DOMAIN } from '../../config/config';
-import { handleIncomingMessage,  handleImageToSquare } from './handlers';
+import { handleIncomingMessage, handleImageToSquare, handleDocuments } from './handlers';
 
 const WEBHOOK_URL = `${WEBHOOK_DOMAIN}`;
 
@@ -17,6 +17,7 @@ export class TelegramBot {
 
   private setup() {
     // Middlewares e handlers aqui
+    this.bot.on('document', handleDocuments);
     this.bot.on('photo', handleImageToSquare);
     this.bot.on('message', handleIncomingMessage);
   }
