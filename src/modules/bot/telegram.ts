@@ -1,8 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { Express } from 'express';
 import { TELEGRAM_BOT_TOKEN, WEBHOOK_DOMAIN } from '../../config/config';
-import { handleIncomingMessage,  handleImageToSquare } from './handlers';
-import { handleDocuments } from "./handlers/document";
+import { handleIncomingMessage, handleImageToSquare, handleDocuments } from './handlers';
 
 const WEBHOOK_URL = `${WEBHOOK_DOMAIN}`;
 
