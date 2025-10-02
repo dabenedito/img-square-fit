@@ -11,6 +11,7 @@ outros.
 - Suporte a diversos formatos de imagem: JPEG, PNG, WebP, TIFF, HEIF, HEIC e GIF (somente o primeiro frame).
 - Orientado a modularidade e escalabilidade.
 ---
+
 ## 📂 Estrutura do Projeto
 ```text
 img-square-fit
