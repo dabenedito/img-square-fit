@@ -24,16 +24,14 @@ img-square-fit
 │   │   │   │   ├── document.ts         # Lida com documentos enviados ao bot
 │   │   │   │   ├── image-processor.ts  # Processamento específico de imagens
 │   │   │   │   ├── message.ts          # Tratamento de mensagens
-│   │   │   │   └── index.ts            # Inicialização do bot
-│   │   │   └── telegram.ts             # Configuração e inicialização do bot Telegraf
-│   │   └── img-processor.ts            # Módulo principal para ajuste de imagens
+│   │   │   │   └── index.ts            # Arquivo index para importação dos handlers de forma menos verbosa
+│   │   └── └── telegram.ts             # Configuração e inicialização do bot Telegraf
 │   ├── services
 │   │   └── sharp.service.ts            # Serviço para manipulação de imagens usando Sharp
 │   ├── types
 │   │   └── document.d.ts               # Tipos TypeScript (definições de dados)
 │   ├── app.ts                          # Inicialização da aplicação
 │   └── server.ts                       # Servidor para execução
-│
 ├── .env                                # Configurações de ambiente (não versionado)
 ├── .env.example                        # Exemplo de arquivo .env
 ├── package.json                        # Configurações e dependências do projeto
