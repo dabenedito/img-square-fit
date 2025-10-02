@@ -1,20 +1,13 @@
-version: '3.8'
+version: "3.9"
 
 services:
   bot:
     build: .
+    container_name: imgsquarefit-bot
+    restart: unless-stopped
     env_file:
       - .env
-    restart: unless-stopped
-
-  proxy:
-    image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "3000:3000"
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./certs:/etc/letsencrypt
-    depends_on:
-      - bot
-    restart: unless-stopped
+      - .:/usr/src/app
