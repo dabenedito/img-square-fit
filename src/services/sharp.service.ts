@@ -1,7 +1,17 @@
-import sharp, { Sharp } from "sharp";
+import sharp from "sharp";
 
 export class SharpService {
-  static async fitImage(sharpBuffer: Sharp): Promise<Buffer<ArrayBufferLike>> {
+  
+  /**
+   * Processes an image buffer to create a square composition with the original image centered
+   * on a blurred background of itself. The final image maintains aspect ratio within a square frame.
+   *
+   * @param buffer - The input image buffer to be processed
+   * @returns A Promise that resolves to a Buffer containing the processed image in PNG format
+   * @throws - Will throw an error if image processing fails
+   */
+  static async fitImage(buffer: Buffer): Promise<Buffer<ArrayBufferLike>> {
+    const sharpBuffer = sharp(buffer);
     const metadata = await sharpBuffer.metadata();
 
     let size: number;

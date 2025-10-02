@@ -1,8 +1,17 @@
 import { Context } from 'telegraf';
-import sharp from 'sharp';
 import { SharpService } from '../../../services/sharp.service';
 
-export const handleImageToSquare = async (ctx: Context, inputBuffer?: Buffer) => {
+/**
+ * Handles the conversion of a Telegram photo message into a square format image.
+ * The function processes the highest resolution version of the uploaded photo,
+ * downloads it from Telegram's servers, and creates a stylized square composition
+ * with the original image centered on a blurred background.
+ *
+ * @param {Context} ctx - Telegram context object containing message data and reply methods
+ * @returns {Promise<void>} A promise that resolves when the image is processed and sent back
+ * @throws {Error} When image download fails or processing encounters issues
+ */
+export const handleImageToSquare = async (ctx: Context) => {
   try {
     const { photo: photos } = <any>ctx.message;
     if (!photos || photos.length === 0) {
@@ -21,8 +30,7 @@ export const handleImageToSquare = async (ctx: Context, inputBuffer?: Buffer) =>
     const arrayBuffer = await response.arrayBuffer();
     const inputBuffer = Buffer.from(arrayBuffer);
 
-    const processedBuffer = sharp(inputBuffer);
-    const fullImage = await SharpService.fitImage(processedBuffer);
+    const fullImage = await SharpService.fitImage(inputBuffer);
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
   } catch (err) {
