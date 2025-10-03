@@ -1,5 +1,6 @@
 import { Context } from 'telegraf';
 import { SharpService } from '../../../services/sharp.service';
+import { QueueService } from "../../../services/queue.service";
 
 /**
  * Handles the conversion of a Telegram photo message into a square format image.
@@ -8,10 +9,11 @@ import { SharpService } from '../../../services/sharp.service';
  * with the original image centered on a blurred background.
  *
  * @param {Context} ctx - Telegram context object containing message data and reply methods
+ * @param {QueueService} queue - Queue service to prevent memory leak.
  * @returns {Promise<void>} A promise that resolves when the image is processed and sent back
  * @throws {Error} When image download fails or processing encounters issues
  */
-export const handleImageToSquare = async (ctx: Context) => {
+export const handleImageToSquare = async (ctx: Context, queue: QueueService) => {
   try {
     const { photo: photos } = <any>ctx.message;
     if (!photos || photos.length === 0) {
@@ -30,7 +32,7 @@ export const handleImageToSquare = async (ctx: Context) => {
     const arrayBuffer = await response.arrayBuffer();
     const inputBuffer = Buffer.from(arrayBuffer);
 
-    const fullImage = await SharpService.fitImage(inputBuffer);
+    const fullImage = await queue.schedule(() => SharpService.fitImage(inputBuffer));
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
   } catch (err) {

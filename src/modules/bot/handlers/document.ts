@@ -2,6 +2,7 @@ import { Context } from 'telegraf';
 import { TELEGRAM_BOT_TOKEN } from "../../../config/config";
 import { FileMetadata } from "../../../types/document";
 import { SharpService } from "../../../services/sharp.service";
+import { QueueService } from "../../../services/queue.service";
 
 
 /**
@@ -9,6 +10,8 @@ import { SharpService } from "../../../services/sharp.service";
  * O processamento inclui validação do formato, download do arquivo e aplicação de efeito de fundo borrado.
  *
  * @param {Context} ctx - O contexto do Telegram contendo informações da mensagem e documento
+ * @param {QueueService} queue - Queue service to prevent memory leak.
+ *
  * @returns {Promise<void>} Promise que resolve após o processamento e envio da imagem
  *
  * @throws {Error} Se houver falha no download ou no processamento da imagem
@@ -16,7 +19,7 @@ import { SharpService } from "../../../services/sharp.service";
  * // Uso como handler do Telegraf
  * bot.on('document', handleDocuments);
  */
-export const handleDocuments = async (ctx: Context) => {
+export const handleDocuments = async (ctx: Context, queue: QueueService) => {
   const document: FileMetadata = (<any>ctx.message).document;
 
   if (document) {
@@ -36,7 +39,7 @@ export const handleDocuments = async (ctx: Context) => {
     const arrayBuffer = await response.arrayBuffer();
     const inputBuffer = Buffer.from(arrayBuffer);
 
-    const fullImage = await SharpService.fitImage(inputBuffer);
+    const fullImage = await queue.schedule(() => SharpService.fitImage(inputBuffer));
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
   }

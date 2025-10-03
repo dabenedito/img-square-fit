@@ -30,7 +30,6 @@ img-square-fit
 │   │   └── sharp.service.ts            # Serviço para manipulação de imagens usando Sharp
 │   ├── types
 │   │   └── document.d.ts               # Tipos TypeScript (definições de dados)
-│   ├── app.ts                          # Inicialização da aplicação
 │   └── server.ts                       # Servidor para execução
 ├── .env                                # Configurações de ambiente (não versionado)
 ├── .env.example                        # Exemplo de arquivo .env
