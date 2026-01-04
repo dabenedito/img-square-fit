@@ -20,7 +20,18 @@ import { QueueService } from "../../../services/queue.service";
  * bot.on('document', handleDocuments);
  */
 export const handleDocuments = async (ctx: Context, queue: QueueService) => {
+  console.log(
+    JSON.stringify({
+      message: 'Document received',
+      handler: 'document-handler',
+      ok: true,
+      date: Date(),
+    })
+  );
+
   const document: FileMetadata = (<any>ctx.message).document;
+
+  const start = Date.now();
 
   if (document) {
     if (!isValidFormat(document.mime_type)) {
@@ -42,6 +53,22 @@ export const handleDocuments = async (ctx: Context, queue: QueueService) => {
     const fullImage = await queue.schedule(() => SharpService.fitImage(inputBuffer));
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
+
+    console.log(JSON.stringify({
+      message: 'Document processed',
+      handler: 'document-handler',
+      ok: true,
+      ms: Date.now() - start,
+    }));
+  } else {
+    console.log(
+      JSON.stringify({
+        message: 'Document processing failed',
+        handler: 'document-handler',
+        ok: false,
+        ms: Date.now() - start,
+      })
+    );
   }
 };
 

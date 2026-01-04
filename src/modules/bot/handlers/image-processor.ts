@@ -14,6 +14,16 @@ import { QueueService } from "../../../services/queue.service";
  * @throws {Error} When image download fails or processing encounters issues
  */
 export const handleImageToSquare = async (ctx: Context, queue: QueueService) => {
+  console.log(
+    JSON.stringify({
+      message: 'Image received',
+      handler: 'image-processor',
+      ok: true,
+      date: Date(),
+    })
+  );
+
+  const start = Date.now();
   try {
     const { photo: photos } = <any>ctx.message;
     if (!photos || photos.length === 0) {
@@ -35,8 +45,22 @@ export const handleImageToSquare = async (ctx: Context, queue: QueueService) => 
     const fullImage = await queue.schedule(() => SharpService.fitImage(inputBuffer));
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
+
+    console.log(JSON.stringify({
+      message: 'Image processed',
+      handler: 'image-processor',
+      ok: true,
+      ms: Date.now() - start,
+    }));
   } catch (err) {
-    console.error('Erro ao processar imagem:', err);
+    console.error(JSON.stringify({
+      message: 'Image processing failed',
+      handler: 'image-processor',
+      ok: false,
+      ms: Date.now() - start,
+      error: err,
+    }));
+
     await ctx.reply('Falhei ao ajustar a imagem. Tenta outra ou verifica se a imagem não está corrompida.');
   }
 }
