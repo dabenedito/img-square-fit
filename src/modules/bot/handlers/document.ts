@@ -2,7 +2,6 @@ import { Context } from 'telegraf';
 import { TELEGRAM_BOT_TOKEN } from "../../../config/config";
 import { FileMetadata } from "../../../types/document";
 import { SharpService } from "../../../services/sharp.service";
-import { QueueService } from "../../../services/queue.service";
 
 
 /**
@@ -10,7 +9,6 @@ import { QueueService } from "../../../services/queue.service";
  * O processamento inclui validação do formato, download do arquivo e aplicação de efeito de fundo borrado.
  *
  * @param {Context} ctx - O contexto do Telegram contendo informações da mensagem e documento
- * @param {QueueService} queue - Queue service to prevent memory leak.
  *
  * @returns {Promise<void>} Promise que resolve após o processamento e envio da imagem
  *
@@ -19,13 +17,19 @@ import { QueueService } from "../../../services/queue.service";
  * // Uso como handler do Telegraf
  * bot.on('document', handleDocuments);
  */
-export const handleDocuments = async (ctx: Context, queue: QueueService) => {
+export const handleDocuments = async (ctx: Context) => {
   console.log(
     JSON.stringify({
       message: 'Document received',
       handler: 'document-handler',
       ok: true,
       date: Date(),
+      from: {
+        user_id: ctx.from?.id,
+        username: ctx.from?.username,
+        chat_id: ctx.chat?.id,
+        type: ctx.updateType,
+      }
     })
   );
 
@@ -35,6 +39,15 @@ export const handleDocuments = async (ctx: Context, queue: QueueService) => {
 
   if (document) {
     if (!isValidFormat(document.mime_type)) {
+      console.log(
+        JSON.stringify({
+          message: 'Document type not supported.',
+          handler: 'document-handler',
+          ok: false,
+          ms: Date.now() - start,
+        })
+      );
+
       return ctx.reply('Por enquanto, só consigo trabalhar com imagens.\nMe envie uma foto que você queira ajustar para o formato quadrado estilizado — com fundo borrado e tudo mais.');
     }
 
@@ -50,7 +63,7 @@ export const handleDocuments = async (ctx: Context, queue: QueueService) => {
     const arrayBuffer = await response.arrayBuffer();
     const inputBuffer = Buffer.from(arrayBuffer);
 
-    const fullImage = await queue.schedule(() => SharpService.fitImage(inputBuffer));
+    const fullImage = await SharpService.fitImage(inputBuffer);
 
     await ctx.replyWithPhoto({ source: fullImage }, { caption: `Imagem ajustada para 1:1` });
 
