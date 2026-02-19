@@ -33,11 +33,24 @@ export const handleDocuments = async (ctx: Context) => {
     })
   );
 
-  const document: FileMetadata = (<any>ctx.message).document;
-
   const start = Date.now();
 
-  if (document) {
+  try {
+    const document: FileMetadata = (<any>ctx.message).document;
+
+    if (!document) {
+      console.warn(
+        JSON.stringify({
+          message: 'No document found in the message',
+          handler: 'document-handler',
+          ok: false,
+          ms: Date.now() - start,
+        })
+      );
+
+      return;
+    }
+
     if (!isValidFormat(document.mime_type)) {
       console.log(
         JSON.stringify({
@@ -50,6 +63,19 @@ export const handleDocuments = async (ctx: Context) => {
 
       return ctx.reply('Por enquanto, só consigo trabalhar com imagens.\nMe envie uma foto que você queira ajustar para o formato quadrado estilizado — com fundo borrado e tudo mais.');
     }
+    
+    if (document.file_size > 10485760) {
+      console.warn(
+        JSON.stringify({
+          message: 'Document too large',
+          handler: 'document-handler',
+          ok: false,
+          ms: Date.now() - start,
+        })
+      );
+
+      return ctx.reply('Desculpe... o máximo que consigo ajustar é até 10MB 🙇‍♀️');
+    }
 
     const fileInfo = await ctx.telegram.getFile(document.file_id);
     const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${fileInfo.file_path}`;
@@ -57,7 +83,7 @@ export const handleDocuments = async (ctx: Context) => {
     const response = await fetch(fileUrl);
 
     if (!response.ok) {
-      return;
+      throw new Error(`Erro ao baixar documento: ${response.status} ${response.statusText}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -73,15 +99,20 @@ export const handleDocuments = async (ctx: Context) => {
       ok: true,
       ms: Date.now() - start,
     }));
-  } else {
-    console.log(
+  } catch (err) {
+    console.error(
       JSON.stringify({
-        message: 'Document processing failed',
+        message: (err as Error)?.message || 'Document processing failed.',
         handler: 'document-handler',
+        stack: (err as Error)?.stack,
         ok: false,
         ms: Date.now() - start,
       })
     );
+
+    await ctx.reply('Desculpe, tive um probleminha ao processar sua imagem. 😅 Por favor, tente novamente mais tarde, vou tentar melhorar! 🙏');
+
+    throw err;
   }
 };
 
