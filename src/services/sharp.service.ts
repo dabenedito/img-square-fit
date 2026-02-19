@@ -28,7 +28,7 @@ export class SharpService {
       .toBuffer();
 
     const background = await sharpBuffer.resize(size, size, { fit: 'cover' })
-      .blur(30)
+      .blur(10)
       .toBuffer();
 
     return await sharp(background)
